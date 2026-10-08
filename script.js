@@ -1,0 +1,13 @@
+const CARD_URL='https://jamil-g.github.io/Jamil-Garzuzi/';
+const DETAILS={name:'Jamil Garzuzi',first:'Jamil',last:'Garzuzi',title:'Senior GIS Consultant | Software & Systems Architect',email:'jamil.garzuzi@gmail.com',phone:'+972548364931',linkedin:'https://www.linkedin.com/in/jamil-garzuzi',website:'https://www.jbgap4.com/geoconsult/'};
+const cardUrl=CARD_URL||location.href.split(/[?#]/)[0];
+const toastEl=document.getElementById('toast');let toastTimer;
+function notify(message){toastEl.textContent=message;toastEl.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toastEl.classList.remove('visible'),2600)}
+function escV(s){return String(s).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;')}
+function makeVCard(){const lines=['BEGIN:VCARD','VERSION:3.0',`N:${escV(DETAILS.last)};${escV(DETAILS.first)};;;`,`FN:${escV(DETAILS.name)}`,`TITLE:${escV(DETAILS.title)}`,`EMAIL;TYPE=INTERNET,WORK:${DETAILS.email}`,`TEL;TYPE=CELL:${DETAILS.phone}`,`URL:${DETAILS.website}`,`X-SOCIALPROFILE;TYPE=linkedin:${DETAILS.linkedin}`,`NOTE:${escV('Digital business card: '+cardUrl)}`];return [...lines,'END:VCARD',''].join('\r\n')}
+document.getElementById('saveContact').addEventListener('click',()=>{const blob=new Blob([makeVCard()],{type:'text/vcard;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='Jamil_Garzuzi.vcf';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);notify('Contact file downloaded')});
+async function copyLink(){try{await navigator.clipboard.writeText(cardUrl);notify('Card link copied')}catch{const el=document.createElement('textarea');el.value=cardUrl;document.body.appendChild(el);el.select();const ok=document.execCommand('copy');el.remove();notify(ok?'Card link copied':'Please copy the URL from your browser')}}
+document.getElementById('copyLink').addEventListener('click',copyLink);
+document.getElementById('shareCard').addEventListener('click',async()=>{if(navigator.share){try{await navigator.share({title:DETAILS.name,text:DETAILS.title,url:cardUrl})}catch(e){if(e.name!=='AbortError')copyLink()}}else copyLink()});
+document.getElementById('year').textContent=new Date().getFullYear();
+const qrTarget=document.getElementById('qrcode');const hint=document.getElementById('qrHint');if(typeof QRCode!=='undefined'){new QRCode(qrTarget,{text:cardUrl,width:160,height:160,colorDark:'#071522',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}else{qrTarget.innerHTML='<span style="color:#173a4a;text-align:center;font-size:13px;padding:12px">QR library unavailable</span>';hint.textContent='Check your internet connection.'}
